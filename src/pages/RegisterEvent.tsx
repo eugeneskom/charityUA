@@ -1,6 +1,8 @@
 import React, { SyntheticEvent, useState } from "react";
 import Breadcrumbs from "../components/Breadcrumbs";
 import axios from "axios";
+import { websiteURL } from "../config";
+import { useParams } from "react-router-dom";
 
 interface FormData {
   firstName: string;
@@ -13,6 +15,7 @@ interface FormData {
 export const validEmailRegex = new RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 
 function RegisterEvent() {
+  const { id } = useParams();
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -75,21 +78,38 @@ function RegisterEvent() {
       return;
     }
     console.log("formData", formData);
+    // const response = await axios.post("http://charity-ua.eugeneskom.com/wp-json/api/register-attendee");
     // If no errors, submit form
     // submitRegistration(formData);
     //  STARTED WORKING ON REGISTRATION PROCESS, NEED TO LEARN HOW TO USE JWT FOR WORDPRESS,
     // BEFORE REGISTRATION FOR THE EVENT, NEED TO EATHER VALIDATE THE TOKEN OR TO SEND EMAIL
     // WITH LINK TO GET TOKEN CONFIRMATION
 
-    const resp = await axios.post("http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/users&email=eugeawneskom@gmail.com&password=NEW_USER_PASSWORD");
+    // const resp = await axios.post("http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/users&email=eugeawneskom@gmail.com&password=NEW_USER_PASSWORD");
 
-    console.log(resp.data, 'response_login_auth')
-    // const response = await axios.post("/wp-json/wp/v2/users", {
+    // console.log(resp.data, 'response_login_auth')
+    // const response = await axios.post(`${websiteURL}wp-json/api/register-attendee`, {
+
+    // const response1 = await axios.post(`${websiteURL}wp-json/jwt-auth/v1/token`, {
+    //   username: formData.firstName + " " + formData.lastName,
+    //   password: formData.password,
+    // });
+    // const response = await axios.post(`${websiteURL}wp-json/custom/v1/register-user-and-event/`, {
     //   username: formData.firstName + " " + formData.lastName,
     //   password: formData.password,
     //   email: formData.email,
+    //   event_id: Number(id),
     //   // other details
     // });
+
+    const response = await axios.post(`${websiteURL}wp-json/custom/v1/register-user/`, {
+      username: formData.firstName + " " + formData.lastName,
+      password: formData.password,
+      email: formData.email,
+      // other details
+    });
+    
+    const token = response.data.token;
 
     // console.log("response", response.data);
   };
@@ -134,7 +154,7 @@ function RegisterEvent() {
             <div className="mb-4">
               {errors.password ? <p className="error text-red-500">{errors.password}</p> : ""}
               <label className="block text-gray-700 font-medium mb-2">Password</label>
-              <input className="border p-2 w-full rounded-lg" onChange={handleChange} type="password" />
+              <input className="border p-2 w-full rounded-lg" onChange={handleChange} type="password" name="password" />
             </div>
 
             <div className="mb-6">

@@ -7,7 +7,7 @@ import axios from "axios";
 
 function ProjectCard({ event }: { event: any }) {
   const navigate = useNavigate();
-  const parsedDescription = extractPlainTextWithLineBreaks(event?.description);
+  const parsedDescription = extractPlainTextWithLineBreaks(event?.post_content);
 
   function shortenText(text: string, maxLength: number) {
     if (text.length <= maxLength) {
@@ -54,18 +54,20 @@ function ProjectCard({ event }: { event: any }) {
   };
 
   return (
-    <li key={event.id} className="bg-white p-4 rounded-lg shadow-md ">
-      <img src={event.image?.url} alt={event.title} className="w-full h-48 object-cover mb-4 rounded-md" />
-      <h2 className="text-xl font-bold mb-2">{event.title}</h2>
+    <li key={event.ID} className="bg-white p-4 rounded-lg shadow-md ">
+      <img src={event.project_image} alt={event.post_title} className="w-full h-48 object-cover mb-4 rounded-md" />
+      <h2 className="text-xl font-bold mb-2">{event.post_title}</h2>
       <h2 className="text-xl font-bold mb-5">{event?.acf?.add_video}</h2>
       <p className="mb-5">{removedLinksDescription}</p>
       <p className="flex mb-5">
         <img src={calendarIcon} alt="" />
-        {event.date}
+        <p className="ml-3">
+        {event.scheduled_date}
+        </p>
       </p>
       {/* <div className="flex items-center content-center"> */}
       <NavLink
-        to={`single-event/${event.id}`}
+        to={`single-event/${event.ID}`}
         rel="noopener noreferrer"
         className="mr-3 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       >
@@ -76,7 +78,7 @@ function ProjectCard({ event }: { event: any }) {
       </NavLink>
 
       <NavLink
-        to={`/events-register/${event.id}`}
+        to={`/events-register/${event.ID}`}
         className="btn mt-3  bg-green-500 inline-flex items-center
       px-5 py-2.5 text-sm font-medium text-center rounded-lg hover:bg-green-700 
       focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-green-600

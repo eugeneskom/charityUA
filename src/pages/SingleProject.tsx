@@ -4,6 +4,8 @@ import { extractPlainTextWithLineBreaks, scrollToTop } from "../libs";
 import calendarIcon from "../assets/img/icons/calendar.svg";
 import Breadcrumbs from "../components/Breadcrumbs";
 import RenderHTML from "../components/RenderHTML";
+import { websiteURL } from "../config";
+import axios from "axios";
 
 interface SingleProjectProps {
   events: [];
@@ -18,9 +20,9 @@ function SingleProject({ events, fetchEvents }: SingleProjectProps) {
 
   const navigate = useNavigate();
 
-  const navigateBack = () => {
-    navigate(-1);
-  };
+  // const navigateBack = () => {
+  //   navigate(-1);
+  // };
 
   useEffect(() => {
     scrollToTop();
@@ -29,13 +31,33 @@ function SingleProject({ events, fetchEvents }: SingleProjectProps) {
     return () => {};
   }, []);
 
+  useEffect(() => {
+    const fetchCurrentEvent = async(id: string) => {
+      
+      try {
+
+        const response = await axios.get(`${websiteURL}wp-json/events/v1/${id}`)
+      } catch (error) {
+        console.error("fetchCurrentEvent: ", error);
+      }
+    };
+    if (id === undefined) return;
+
+    fetchCurrentEvent(id); 
+
+    return () => {};
+  }, []);
+
   if (events.length === 0) return <h1>Loading</h1>;
 
-  const currentEvent = events.find((event: any) => event.id == id) as any;
+  const currentEvent = events.find((event: any) => event.ID == id) as any;
+
 
   if (!currentEvent) {
     return <h1>Event not found</h1>;
   }
+
+
 
   console.log("currentEvent", currentEvent);
   const parsedDescription = extractPlainTextWithLineBreaks(currentEvent?.description);
@@ -48,7 +70,7 @@ function SingleProject({ events, fetchEvents }: SingleProjectProps) {
       bg-white rounded-lg shadow dark:bg-gray-900 p-4"
       >
         <Breadcrumbs currentPage="Project" />
-        <h1 className="text-2xl font-bold mb-5">{currentEvent.title}</h1>
+        <h1 className="text-2xl font-bold mb-5">{currentEvent.post_title}</h1>
         <div className="header flex gap-3">
           <NavLink
             to={`/events-register/${id}`}
@@ -70,20 +92,20 @@ function SingleProject({ events, fetchEvents }: SingleProjectProps) {
             Залишити донат
           </button>
         </div>
-        <img src={currentEvent?.image?.url || ""} alt={currentEvent.title} className="w-full h-48 object-cover mb-5 rounded-md" />
+        <img src={currentEvent?.project_image || ""} alt={currentEvent.post_title} className="w-full h-48 object-cover mb-5 rounded-md" />
         <div className="flex items-end gap-3 justify-between">
           <div className="flex">
             <img src={calendarIcon} alt="" className="w-6 h-6 mr-2" />
-            <p>{currentEvent.date}</p>
+            <p>{currentEvent.scheduled_date}</p>
           </div>
-          {currentEvent.tags.map((tag: any) => {
+          {/* {currentEvent.tags.map((tag: any) => {
             return <p className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg">{tag.name}</p>;
-          })}
+          })} */}
         </div>
         <h2 className="text-lg font-bold mb-5">{currentEvent?.acf?.add_video}</h2>
 
-        {<RenderHTML htmlString={currentEvent?.description} />}
-        <p className="mb-5">{parsedDescription}</p>
+        {<RenderHTML htmlString={currentEvent?.post_content} />}
+        {/* <p className="mb-5">{parsedDescription}</p> */}
       </section>
     </>
   );

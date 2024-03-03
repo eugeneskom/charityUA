@@ -92,11 +92,17 @@ function App() {
   }, []);
 
   const fetchEvents = async () => {
-    const response = await axios.get(`${websiteURL}${eventsURL}`);
-    console.log(response.data);
-    const data = response.data;
-    const eventData = data.events;
-    setEvents(eventData);
+    // const response = await axios.get(`${websiteURL}${eventsURL}`);
+    try {
+      const response = await axios.get(`${websiteURL}wp-json/events/v1/all-events`);
+      console.log('fetchEvents',response.data);
+      if(response.status == 200){
+        setEvents(response.data);
+      }
+    } catch (error) {
+      console.error('fetchEvents: ', error);
+    }
+
   };
 
   useEffect(() => {
@@ -109,7 +115,7 @@ function App() {
       }
     };
 
-    fetchAtendees();
+    // fetchAtendees();
 
     return () => {};
   }, []);
@@ -128,7 +134,8 @@ function App() {
                 <>
                   <Hero heroData={pageData.hero} />
                   <AboutUs aboutData={pageData.aboutUs} sectionRef={sectionRefAbout} />
-                  <Projects events={events} sectionRef={sectionRefProjects} />
+
+                  {events.length > 0 ? <Projects events={events} sectionRef={sectionRefProjects} /> : <h1>No upcoming events</h1>}
                 </>
               }
             />

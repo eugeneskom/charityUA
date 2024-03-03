@@ -8,7 +8,7 @@ function EventsArchive({ events }: { events: any }) {
     const now = new Date();
     const filterOld = events.filter((event: any) => {
       // Parse saved date
-      const eventDate = new Date(event.date);
+      const eventDate = new Date(event.scheduled_date);
       // Check if greater than today
       return eventDate < now;
     });
