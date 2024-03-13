@@ -14,7 +14,7 @@ export function extractPlainTextWithLineBreaks(htmlString: string) {
 
       // Add two line breaks after closing tags
       if (element.tagName) {
-        plainText += '\n\n';
+        plainText += "\n\n";
       }
     } else if (node.nodeType === Node.TEXT_NODE) {
       plainText += node.nodeValue || "";
@@ -26,14 +26,26 @@ export function extractPlainTextWithLineBreaks(htmlString: string) {
   return plainText.trim();
 }
 
-export const RenderHTML = ({ htmlString }:{htmlString:string}) => {
+export const RenderHTML = ({ htmlString }: { htmlString: string }) => {
   return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
 };
 
-
 export const scrollToTop = () => {
   window.scrollTo({
-    top: 0,
+    top: 64,
     // behavior: 'smooth',
   });
+};
+
+export const parseApiResponse = (data: string): any => {
+  // const data = response.data;
+
+  // Remove any characters before the opening curly brace
+  const cleanedData = data.substring(data.indexOf("{"));
+
+  // Remove any characters after the closing curly brace
+  const finalData = cleanedData.substring(0, cleanedData.lastIndexOf("}") + 1);
+
+  // Parse the cleaned string as JSON
+  return JSON.parse(finalData);
 };

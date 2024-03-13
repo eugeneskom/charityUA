@@ -2,8 +2,8 @@ import React, { SyntheticEvent, useState } from "react";
 import Breadcrumbs from "../components/Breadcrumbs";
 import axios from "axios";
 import { websiteURL } from "../config";
-import { useParams } from "react-router-dom";
-
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+import LoadingOverlay from "../components/LoadingOverlay";
 interface FormData {
   firstName: string;
   lastName: string;
@@ -14,8 +14,12 @@ interface FormData {
 
 export const validEmailRegex = new RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 
-function RegisterEvent() {
+interface RegisterEventProps {
+  jwtToken: string | null;
+}
+function RegisterEvent({ jwtToken }: RegisterEventProps) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -31,6 +35,10 @@ function RegisterEvent() {
     password: "",
     confirmPassword: "",
   });
+
+  const [authStatus, setAuthStatus] = useState("register");
+
+  const [registeringLoading, setRegisteringLoading] = useState(false);
 
   console.log("formData", formData);
 
@@ -68,48 +76,89 @@ function RegisterEvent() {
     return errors;
   };
 
-  const handleSubmit = async (e: SyntheticEvent) => {
+  const registerUser = async (userData: FormData) => {
+    try {
+      const { email, password } = userData;
+      const url = "http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/users";
+      const payload = { ...userData, event_id: id };
+
+      const response = await axios.post(url, payload);
+      console.log("registerUser", response, response.data);
+      const { data } = response;
+      if (data.success) {
+        loginUser(email, password);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {}
+  };
+
+  const loginUser = async (username: string, password: string) => {
+    try {
+      let formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+      const url = `${websiteURL}?rest_route=/simple-jwt-login/v1/auth`;
+
+      const response = await axios.post(url, formData);
+      let jwt = null;
+      console.log("response", response);
+      if (response.status === 200) {
+        jwt = response.data.data.jwt;
+        localStorage.setItem("jwt", jwt);
+      }
+
+      const loginResponse = await axios.get(`http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/autologin&JWT=${jwt}`);
+    } catch (error) {}
+  };
+
+  const handleRegistrationSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    try {
+      const errors = validate();
 
-    const errors = validate();
+      if (Object.keys(errors).length) {
+        setErrors(errors);
+        return;
+      }
 
-    if (Object.keys(errors).length) {
-      setErrors(errors);
-      return;
+      console.log("formData", formData);
+      setRegisteringLoading(true);
+      // await registerUser(formData)
+      const credentials = {
+        username: formData.firstName + " " + formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        // event_id: 117
+      };
+      const response = await axios.post(`${websiteURL}wp-json/custom/v1/register-user/`, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        username: formData.firstName + " " + formData.lastName,
+        password: formData.password,
+        email: formData.email,
+        event_ids: [Number(id)],
+      });
+
+      const urlToken = `${websiteURL}wp-json/jwt-auth/v1/token`;
+
+      const responseToken = await axios.post(urlToken, credentials);
+      localStorage.setItem("token", responseToken.data.token);
+
+      // const token = response.data.data.token;
+      const isSuccess = response.data.success;
+      // localStorage.setItem("token", token);
+
+      if (isSuccess) {
+        navigate(`/success-page/${id}`);
+        setRegisteringLoading(false);
+      } else {
+        setRegisteringLoading(false);
+      }
+    } catch (error) {
+      setRegisteringLoading(false);
+      console.error("Registration error:", error);
     }
-    console.log("formData", formData);
-    // const response = await axios.post("http://charity-ua.eugeneskom.com/wp-json/api/register-attendee");
-    // If no errors, submit form
-    // submitRegistration(formData);
-    //  STARTED WORKING ON REGISTRATION PROCESS, NEED TO LEARN HOW TO USE JWT FOR WORDPRESS,
-    // BEFORE REGISTRATION FOR THE EVENT, NEED TO EATHER VALIDATE THE TOKEN OR TO SEND EMAIL
-    // WITH LINK TO GET TOKEN CONFIRMATION
-
-    // const resp = await axios.post("http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/users&email=eugeawneskom@gmail.com&password=NEW_USER_PASSWORD");
-
-    // console.log(resp.data, 'response_login_auth')
-    // const response = await axios.post(`${websiteURL}wp-json/api/register-attendee`, {
-
-    // const response1 = await axios.post(`${websiteURL}wp-json/jwt-auth/v1/token`, {
-    //   username: formData.firstName + " " + formData.lastName,
-    //   password: formData.password,
-    // });
-    // const response = await axios.post(`${websiteURL}wp-json/custom/v1/register-user-and-event/`, {
-    //   username: formData.firstName + " " + formData.lastName,
-    //   password: formData.password,
-    //   email: formData.email,
-    //   event_id: Number(id),
-    //   // other details
-    // });
-
-    const response = await axios.post(`${websiteURL}wp-json/custom/v1/register-user/`, {
-      username: formData.firstName + " " + formData.lastName,
-      password: formData.password,
-      email: formData.email,
-      // other details
-    });
-    
-    const token = response.data.token;
 
     // console.log("response", response.data);
   };
@@ -123,14 +172,74 @@ function RegisterEvent() {
     }));
   };
 
-  return (
-    <main className="max-w-5xl mx-auto my-8 px-6">
-      <Breadcrumbs currentPage="Registration" />
-      <section className="bg-white p-8 rounded shadow-md">
-        <h2 className="text-lg font-medium mb-6">Register to Attend</h2>
+  const handleLoginSubmit = () => {};
 
-        <div>
-          <form className="bg-white p-6 rounded-lg shadow-md max-w-lg" onSubmit={handleSubmit}>
+  return (
+    <main className="max-w-5xl mx-auto my-8 px-6 relative w-full">
+      {registeringLoading && <LoadingOverlay />}
+      <section className="max-w-lg mx-auto bg-white p-8 rounded shadow-md ">
+        {authStatus === "login" ? (
+          <div className="bg-white p-6 rounded-lg shadow-md h-fit">
+            <h2 className="text-lg font-medium mb-4">Login</h2>
+            <form onSubmit={handleLoginSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <input
+                  className="border p-2 w-full rounded-lg"
+                  type="email"
+                  name="email"
+                  // value={loginEmail}
+                  // onChange={handleLoginChange}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">Password</label>
+                <input
+                  className="border p-2 w-full rounded-lg"
+                  type="password"
+                  name="password"
+                  // value={loginPassword}
+                  // onChange={handleLoginChange}
+                />
+              </div>
+              {/* {loginError && <p className="text-red-500 mb-4">{loginError}</p>} */}
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mb-4">
+                Login
+              </button>
+            </form>
+            <button className="text-blue-500 hover:underline" onClick={() => setAuthStatus("register")}>
+              Don't have an account? Register here.
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
+
+        {authStatus === "reset" ? (
+          <form
+            // onSubmit={handleResetSubmit}
+            className="mt-4"
+          >
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Email</label>
+              <input
+                className="border p-2 w-full rounded-lg"
+                type="email"
+                name="resetEmail"
+                // value={resetEmail}
+                // onChange={handleResetChange}
+              />
+            </div>
+            <a onClick={() => setAuthStatus("reset")} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+              Reset Password
+            </a>
+          </form>
+        ) : (
+          ""
+        )}
+
+        {authStatus === "register" ? (
+          <form className="bg-white p-6 rounded-lg shadow-md mt-4" onSubmit={handleRegistrationSubmit}>
             <h2 className="text-lg font-medium mb-4">Attendee Registration</h2>
 
             <div className="mb-4">
@@ -166,8 +275,15 @@ function RegisterEvent() {
             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
               Register
             </button>
+            <div className="mt-5">
+              <a className="text-blue-500 hover:underline cursor-pointer" onClick={() => setAuthStatus("login")}>
+                Have an account? Login here.
+              </a>
+            </div>
           </form>
-        </div>
+        ) : (
+          ""
+        )}
       </section>
     </main>
   );

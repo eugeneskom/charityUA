@@ -5,10 +5,15 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { websiteURL } from "../config";
 import axios from "axios";
 
-function ProjectCard({ event }: { event: any }) {
-  const navigate = useNavigate();
-  const parsedDescription = extractPlainTextWithLineBreaks(event?.post_content);
+interface ProjectCardProps {
+  event: any;
+  status?: "completed" | "upcoming";
+}
 
+function ProjectCard({ event, status }: ProjectCardProps) {
+  const navigate = useNavigate();
+  const parsedDescription = extractPlainTextWithLineBreaks(event?.content);
+  console.log('ProjectCard', event)
   function shortenText(text: string, maxLength: number) {
     if (text.length <= maxLength) {
       return text;
@@ -39,7 +44,7 @@ function ProjectCard({ event }: { event: any }) {
   };
   async function fetchRegister(formData: any) {
     const resp = await axios.post(`${websiteURL}wp-json/api/register-attendee`, formData);
-    console.log("fetchRegister", resp.data);
+    // console.log("fetchRegister", resp.data);
   }
 
   const handleRegister = async () => {
@@ -50,43 +55,46 @@ function ProjectCard({ event }: { event: any }) {
 
   const navigateToRegistration = (id: string) => {
     navigate(`/events-register/${id}`);
-    
   };
 
+  // console.log("status", status);
+
   return (
-    <li key={event.ID} className="bg-white p-4 rounded-lg shadow-md ">
-      <img src={event.project_image} alt={event.post_title} className="w-full h-48 object-cover mb-4 rounded-md" />
-      <h2 className="text-xl font-bold mb-2">{event.post_title}</h2>
-      <h2 className="text-xl font-bold mb-5">{event?.acf?.add_video}</h2>
+    <li key={event.id} className="bg-white p-4 rounded-lg shadow-md ">
+      <img src={event.acf_fields.project_image} alt={event.title} className="w-full h-48 object-cover mb-4 rounded-md" />
+      <h2 className="text-xl font-bold mb-2">{event.title}</h2>
+      {/* <h2 className="text-xl font-bold mb-5">{event?.acf?.add_video}</h2> */}
       <p className="mb-5">{removedLinksDescription}</p>
       <p className="flex mb-5">
         <img src={calendarIcon} alt="" />
-        <p className="ml-3">
-        {event.scheduled_date}
-        </p>
+        <p className="ml-3">{event.acf_fields.date}</p>
       </p>
-      {/* <div className="flex items-center content-center"> */}
-      <NavLink
-        to={`single-event/${event.ID}`}
-        rel="noopener noreferrer"
-        className="mr-3 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-      >
-        Докладніше
-        <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-        </svg>
-      </NavLink>
 
-      <NavLink
-        to={`/events-register/${event.ID}`}
-        className="btn mt-3  bg-green-500 inline-flex items-center
-      px-5 py-2.5 text-sm font-medium text-center rounded-lg hover:bg-green-700 
-      focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-green-600
-      dark:hover:bg-blue-700 dark:focus:ring-green-800 text-white"
-        // onClick={()=>navigateToRegistration(event.id)}
-      >
-        Прийняти участь
-      </NavLink>
+      {/* <div className="flex"> */}
+        <NavLink
+          to={`single-project/${event.id}`}
+          rel="noopener noreferrer"
+          className="mr-3 inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Докладніше
+          <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+          </svg>
+        </NavLink>
+        {status !== "completed" ? (
+          <NavLink
+            to={`/events-register/${event.id}`}
+            className="btn mt-3  bg-green-600 inline-flex items-center
+    px-5 py-2.5 text-sm font-medium text-center rounded-lg hover:bg-green-700 
+    focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-green-800
+    dark:hover:bg-blue-700 dark:focus:ring-green-800 text-white"
+            // onClick={()=>navigateToRegistration(event.id)}
+          >
+            Прийняти участь
+          </NavLink>
+        ) : (
+          ""
+        )}
       {/* </div> */}
     </li>
   );

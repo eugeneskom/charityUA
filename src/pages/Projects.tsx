@@ -1,35 +1,48 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ProjectCard from "../components/ProjectCard";
+import Swiper from "react-id-swiper";
+import "swiper/swiper-bundle.css";
 interface ProjectsProps {
   events: [];
   sectionRef: any;
 }
+
+const params = {
+  slidesPerView: 1,
+  spaceBetween: 30,
+  breakpoints: {
+    768: {
+      slidesPerView: 2,
+    },
+    1024: {
+      slidesPerView: 3,
+    },
+  },
+};
 function Projects({ events, sectionRef }: ProjectsProps) {
+
+  console.log('Projects',events)
   return (
     <section
       ref={sectionRef}
-      className="bg px-4 py-8 mx-auto lg:py-16
-      bg-white-transparent
+      className="bg px-2 py-8  lg:py-16
+      bg-white-transparent mb-10 overflow-hidden
     "
     >
-      <div
-        className=" 
-       
-      max-w-screen-xl px-4 py-8 mx-auto
-      "
+      <ul
+        className="max-w-screen-xl mx-auto"
       >
-        <h2 className="my-6 text-2xl tracking-tight font-extrabold text-gray-900 sm:text-3xl md:text-4xl text-center">Projects</h2>
-        <ul
-          className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3
-      
-      "
-        >
-          {events?.map((event: any) => {
-            return <ProjectCard event={event} />;
-          })}
-        </ul>
-      </div>
+        <h2 className="my-6 text-2xl tracking-tight font-extrabold text-gray-900 sm:text-3xl md:text-4xl text-center mt-0">Projects</h2>
+
+        <Swiper {...params}>
+          {events?.map((event: any) => (
+            <div key={event.id}>
+              <ProjectCard event={event} />
+            </div>
+          ))}
+        </Swiper>
+      </ul>
     </section>
   );
 }

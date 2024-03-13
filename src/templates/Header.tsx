@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { HeaderData } from "../App";
 
 interface HeaderProps {
@@ -10,14 +10,18 @@ interface HeaderProps {
 }
 function Header({ handleScroll, projectsRef, aboutRef ,headerData}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [activeLink, setActiveLink] = useState('')
+  const location = useLocation();
+  const pathname = location.pathname;
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  console.log('pathname',pathname)
   const navigate = useNavigate();
 
   return (
-    <header>
+    <header className="sticky top-0 bg-blue-700 header">
       <nav className=" border-gray-200 dark:bg-gray-900 bg-white-transparent">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <NavLink to='/' className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -41,7 +45,8 @@ function Header({ handleScroll, projectsRef, aboutRef ,headerData}: HeaderProps)
           <div className={`${isMenuOpen ? "" : "hidden"} w-full md:block md:w-auto`} id="navbar-default">
             <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg  md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
               <li>
-                <NavLink to="/" className="block py-2 px-3 text-white rounded  md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">
+                <NavLink to="/" className={`${pathname === '/' ? 'block py-2 px-3 text-white rounded  md:p-0 dark:text-white md:dark:text-blue-500' : 
+                "block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}`} aria-current="page">
                   Головна
                 </NavLink>
               </li>
@@ -59,15 +64,16 @@ function Header({ handleScroll, projectsRef, aboutRef ,headerData}: HeaderProps)
                 </button>
               </li>
               <li>
-                <NavLink to="/events-archive" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+                <NavLink to="/projects-archive" className={`${pathname === '/projects-archive' ? 'block py-2 px-3 text-white rounded  md:p-0 dark:text-white md:dark:text-blue-500' : 
+                "block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"}`}>
                   Звіти по проектам
                 </NavLink>
               </li>
 
               <li>
-                <a href="#" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+                <NavLink to="/contact" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                   Контакти
-                </a>
+                </NavLink>
               </li>
             </ul>
           </div>
