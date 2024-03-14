@@ -14,10 +14,10 @@ interface FormData {
 
 export const validEmailRegex = new RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 
-interface RegisterEventProps {
+interface RegisterForProjectProps {
   jwtToken: string | null;
 }
-function RegisterEvent({ jwtToken }: RegisterEventProps) {
+function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
@@ -174,6 +174,19 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
 
   const handleLoginSubmit = () => {};
 
+  const handleResetSubmit = async (e:SyntheticEvent) => {
+    e.preventDefault();
+    const sendResetPassword = async () =>  {
+    const response = await axios.post(`${websiteURL}wp-json/bdpwr/v1/reset-password`, {
+      email: formData.email,
+    });
+    console.log('response', response.data);
+    return response.data
+    }
+    const resetPassword = await sendResetPassword();
+    // console.log('response', response.data);
+  };
+
   return (
     <main className="max-w-5xl mx-auto my-8 px-6 relative w-full">
       {registeringLoading && <LoadingOverlay />}
@@ -188,8 +201,8 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
                   className="border p-2 w-full rounded-lg"
                   type="email"
                   name="email"
-                  // value={loginEmail}
-                  // onChange={handleLoginChange}
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
               <div className="mb-4">
@@ -198,8 +211,8 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
                   className="border p-2 w-full rounded-lg"
                   type="password"
                   name="password"
-                  // value={loginPassword}
-                  // onChange={handleLoginChange}
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
               {/* {loginError && <p className="text-red-500 mb-4">{loginError}</p>} */}
@@ -210,6 +223,9 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
             <button className="text-blue-500 hover:underline" onClick={() => setAuthStatus("register")}>
               Don't have an account? Register here.
             </button>
+            <button className="text-blue-500 hover:underline" onClick={() => setAuthStatus("reset")}>
+              Forgot Password? Reset here.
+            </button>
           </div>
         ) : (
           ""
@@ -217,7 +233,7 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
 
         {authStatus === "reset" ? (
           <form
-            // onSubmit={handleResetSubmit}
+            onSubmit={handleResetSubmit}
             className="mt-4"
           >
             <div className="mb-4">
@@ -225,14 +241,14 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
               <input
                 className="border p-2 w-full rounded-lg"
                 type="email"
-                name="resetEmail"
-                // value={resetEmail}
-                // onChange={handleResetChange}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
               />
             </div>
-            <a onClick={() => setAuthStatus("reset")} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
               Reset Password
-            </a>
+            </button>
           </form>
         ) : (
           ""
@@ -289,4 +305,4 @@ function RegisterEvent({ jwtToken }: RegisterEventProps) {
   );
 }
 
-export default RegisterEvent;
+export default RegisterForProject;
