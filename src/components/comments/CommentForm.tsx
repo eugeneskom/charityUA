@@ -41,29 +41,29 @@ const CommentForm = ({ postId, jwtToken }: CommentFormProps) => {
     }
 };
 
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        const response = await axios.get(`${websiteURL}wp-json/wp/v2/users/me`, {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        });
+  // useEffect(() => {
+  //   const checkAuthentication = async () => {
+  //     try {
+  //       const response = await axios.get(`${websiteURL}wp-json/wp/v2/users/me`, {
+  //         headers: {
+  //           Authorization: `Bearer ${jwtToken}`,
+  //         },
+  //       });
     
-        // Log the user data for debugging
-        console.log('Authenticated User:', response.data);
-      } catch (error) {
-        console.error('Authentication Check Error:', error);
-      }
-    };
+  //       // Log the user data for debugging
+  //       console.log('Authenticated User:', response.data);
+  //     } catch (error) {
+  //       console.error('Authentication Check Error:', error);
+  //     }
+  //   };
     
-    // Call the authentication check function before posting the comment
-    checkAuthentication();
+  //   // Call the authentication check function before posting the comment
+  //   checkAuthentication();
   
-    return () => {
+  //   return () => {
       
-    }
-  }, [])
+  //   }
+  // }, [])
   
 
   return (

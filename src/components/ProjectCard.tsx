@@ -66,7 +66,7 @@ function ProjectCard({ event, status }: ProjectCardProps) {
       {/* <h2 className="text-xl font-bold mb-5">{event?.acf?.add_video}</h2> */}
       <p className="mb-5">{removedLinksDescription}</p>
       <p className="flex mb-5">
-        <img src={calendarIcon} alt="" />
+        <img src={calendarIcon} alt="" loading="lazy" />
         <p className="ml-3">{event.acf_fields.date}</p>
       </p>
 

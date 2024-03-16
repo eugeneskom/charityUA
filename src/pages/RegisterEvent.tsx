@@ -10,15 +10,14 @@ interface FormData {
   email: string;
   password: string;
   confirmPassword: string;
-  code: string;
 }
 
 export const validEmailRegex = new RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 
-interface RegisterForProjectProps {
+interface RegisterEventProps {
   jwtToken: string | null;
 }
-function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
+function RegisterEvent({ jwtToken }: RegisterEventProps) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
@@ -27,7 +26,6 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    code: "",
   });
 
   const [errors, setErrors] = useState<FormData>({
@@ -36,12 +34,9 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    code: "",
   });
 
-  type AuthenticatioinType = "login" | "register" | "reset" | "reset-password";
-
-  const [authStatus, setAuthStatus] = useState<AuthenticatioinType>("register");
+  const [authStatus, setAuthStatus] = useState("register");
 
   const [registeringLoading, setRegisteringLoading] = useState(false);
 
@@ -110,7 +105,7 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
       console.log("response", response);
       if (response.status === 200) {
         jwt = response.data.data.jwt;
-        localStorage.setItem("jwt", jwt);
+        localStorage.setItem("jwt", jwt ? jwt : '');
       }
 
       const loginResponse = await axios.get(`http://charity-ua.eugeneskom.com/?rest_route=/simple-jwt-login/v1/autologin&JWT=${jwt}`);
@@ -179,42 +174,6 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
 
   const handleLoginSubmit = () => {};
 
-  const handleResetSubmit = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    const sendResetPassword = async () => {
-      const response = await axios.post(`${websiteURL}wp-json/bdpwr/v1/reset-password`, {
-        email: formData.email,
-      });
-      console.log("response", response.data);
-      const status = response.data.data.status;
-      return status;
-    };
-
-    const resetPasswordStatus = await sendResetPassword();
-    setAuthStatus("reset-password");
-
-    // console.log('response', response.data);
-    if (resetPasswordStatus !== 200) alert("something went wrong reseting password");
-  };
-
-  const handleSetNewPassword = async (e: SyntheticEvent) => {
-    e.preventDefault();
-
-    const setNewPassword = async () => {
-      const response = await axios.post(`${websiteURL}wp-json/bdpwr/v1/set-password`, {
-        email: formData.email,
-        password: formData.password,
-        code: formData.code,
-      });
-      return response.data ?? null;
-    };
-
-    setAuthStatus("login");
-
-    const setNewPasswordResponse = await setNewPassword();
-    console.log("setNewPasswordResponse", setNewPasswordResponse);
-  };
-
   return (
     <main className="max-w-5xl mx-auto my-8 px-6 relative w-full">
       {registeringLoading && <LoadingOverlay />}
@@ -225,11 +184,23 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
             <form onSubmit={handleLoginSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700 font-medium mb-2">Email</label>
-                <input className="border p-2 w-full rounded-lg" type="email" name="email" value={formData.email} onChange={handleChange} />
+                <input
+                  className="border p-2 w-full rounded-lg"
+                  type="email"
+                  name="email"
+                  // value={loginEmail}
+                  // onChange={handleLoginChange}
+                />
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-medium mb-2">Password</label>
-                <input className="border p-2 w-full rounded-lg" type="password" name="password" value={formData.email} onChange={handleChange} />
+                <input
+                  className="border p-2 w-full rounded-lg"
+                  type="password"
+                  name="password"
+                  // value={loginPassword}
+                  // onChange={handleLoginChange}
+                />
               </div>
               {/* {loginError && <p className="text-red-500 mb-4">{loginError}</p>} */}
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mb-4">
@@ -239,44 +210,29 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
             <button className="text-blue-500 hover:underline" onClick={() => setAuthStatus("register")}>
               Don't have an account? Register here.
             </button>
-            <button className="text-blue-500 hover:underline" onClick={() => setAuthStatus("reset")}>
-              Forgot Password? Reset here.
-            </button>
           </div>
         ) : (
           ""
         )}
 
         {authStatus === "reset" ? (
-          <form onSubmit={handleResetSubmit} className="mt-4">
+          <form
+            // onSubmit={handleResetSubmit}
+            className="mt-4"
+          >
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">Email</label>
-              <input className="border p-2 w-full rounded-lg" type="email" name="email" value={formData.email} onChange={handleChange} />
+              <input
+                className="border p-2 w-full rounded-lg"
+                type="email"
+                name="resetEmail"
+                // value={resetEmail}
+                // onChange={handleResetChange}
+              />
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            <a onClick={() => setAuthStatus("reset")} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
               Reset Password
-            </button>
-          </form>
-        ) : (
-          ""
-        )}
-        {authStatus === "reset-password" ? (
-          <form onSubmit={handleSetNewPassword} className="mt-4">
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Email</label>
-              <input className="border p-2 w-full rounded-lg" type="email" name="email" value={formData.email} onChange={handleChange} />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Новий пароль</label>
-              <input className="border p-2 w-full rounded-lg" type="password" name="password" value={formData.password} onChange={handleChange} />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-medium mb-2">Email</label>
-              <input className="border p-2 w-full rounded-lg" type="text" name="code" value={formData.code} onChange={handleChange} />
-            </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-              Reset Password
-            </button>
+            </a>
           </form>
         ) : (
           ""
@@ -333,4 +289,4 @@ function RegisterForProject({ jwtToken }: RegisterForProjectProps) {
   );
 }
 
-export default RegisterForProject;
+export default RegisterEvent;

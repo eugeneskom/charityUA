@@ -16,3 +16,26 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Entire scrollbar */
+::-webkit-scrollbar {
+  width: 10px; /* Horizontal scrollbar width */
+  height: 10px; /* Vertical scrollbar height */
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+  background: linear-gradient(to bottom, #0057b8, #ffd700);
+  @apply  rounded-full;
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 rounded-full;
+  
+}
+
+/* Scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #0045a6, #e6c800);
+}

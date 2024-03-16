@@ -65,6 +65,7 @@ function SingleProject({ events, fetchEvents, jwtToken }: SingleProjectProps) {
   }, []); // Empty dependency array ensures the effect runs only once after the initial render
 
   useEffect(() => {
+
     const fetchCurrentEvent = async (id: string) => {
       try {
         const response = await axios.get(`${websiteURL}wp-json/events/v1/${id}`);

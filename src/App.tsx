@@ -17,6 +17,7 @@ import Loader from "./components/Loading";
 import SuccessPage from "./pages/SuccessPage";
 import ContactPage from "./pages/ContactPage";
 import { parseApiResponse } from "./libs";
+import UserAccount from "./components/UserAccount";
 export interface HeaderData {
   logo: string;
   logo_text: string;
@@ -258,7 +259,7 @@ function App() {
                 <>
                   <Hero heroData={pageData.hero} />
                   <AboutUs aboutData={pageData.aboutUs} sectionRef={sectionRefAbout} />
-
+                  {/* <UserAccount/> */}
                   {events.length > 0 ? <Projects events={upcomingEvents} sectionRef={sectionRefProjects} /> : <h1>No upcoming events</h1>}
                 </>
               }
